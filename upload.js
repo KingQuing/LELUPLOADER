@@ -1,12 +1,17 @@
+import { createBlob } from '@vercel/blob';
 import formidable from 'formidable';
-import fs from 'fs';
-import path from 'path';
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: false, // Disable Vercel's default body parser to handle files manually
   },
 };
+
+// Initialize Vercel Blob client using environment variables for token and endpoint
+const blobClient = createBlob({
+  token: process.env.VERCEL_BLOB_TOKEN,  // Set your Vercel Blob token as an environment variable
+  endpoint: process.env.VERCEL_BLOB_ENDPOINT,  // Set your Vercel Blob endpoint as an environment variable
+});
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,26 +19,28 @@ export default async function handler(req, res) {
   }
 
   const form = new formidable.IncomingForm();
-  const uploadDir = path.join(process.cwd()); // Save directly to the root directory
+  form.keepExtensions = true; // Retain the file extensions (e.g., .png, .jpg)
 
-  // Ensure the upload directory exists (even though we're saving directly in the root)
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
+  // Parse the form and handle the uploaded file
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
 
-  form.uploadDir = uploadDir;
-  form.keepExtensions = true;
+    const file = files.file[0];  // Get the uploaded file
+    const filePath = file.filepath;
 
-  form.parse(req, (err, fields, files) => {
-    if (err) return res.status(500).json({ error: err.message });
+    try {
+      // Upload the file to Vercel Blob Storage
+      const blob = await blobClient.upload(filePath, file.originalFilename);
 
-    const file = files.file[0];
-    const fileName = path.basename(file.filepath); // Get the filename
-    const domain = 'https://leluploader.vercel.app'; // Use your Vercel domain
+      // Get the raw URL for the uploaded file
+      const fileUrl = blob.url;
 
-    // The file URL will be directly in the root directory
-    const fileUrl = `${domain}/${fileName}`;
-
-    return res.status(200).json({ url: fileUrl });
+      // Respond with the file URL
+      return res.status(200).json({ url: fileUrl });
+    } catch (error) {
+      return res.status(500).json({ error: 'Failed to upload the file.' });
+    }
   });
 }

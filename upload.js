@@ -14,9 +14,9 @@ export default async function handler(req, res) {
   }
 
   const form = new formidable.IncomingForm();
-  const uploadDir = path.join(process.cwd(), 'uploads');  // Changed from 'public/uploads'
+  const uploadDir = path.join(process.cwd()); // Save directly to the root directory
 
-  // Ensure the upload directory exists
+  // Ensure the upload directory exists (even though we're saving directly in the root)
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
@@ -28,10 +28,11 @@ export default async function handler(req, res) {
     if (err) return res.status(500).json({ error: err.message });
 
     const file = files.file[0];
-    const fileName = path.basename(file.filepath);
-    const domain = 'https://leluploader.vercel.app'; // Update to your Vercel domain
+    const fileName = path.basename(file.filepath); // Get the filename
+    const domain = 'https://leluploader.vercel.app'; // Use your Vercel domain
 
-    const fileUrl = `${domain}/uploads/${fileName}`;
+    // The file URL will be directly in the root directory
+    const fileUrl = `${domain}/${fileName}`;
 
     return res.status(200).json({ url: fileUrl });
   });

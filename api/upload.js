@@ -10,15 +10,12 @@ module.exports = (req, res) => {
                 return;
             }
 
-            // Files are in `files.files` (based on the input name "files")
             const uploadedFiles = files.files || [];
             if (uploadedFiles.length === 0) {
                 res.status(400).send('No files uploaded');
                 return;
             }
 
-            // For Vercel, you can't write to the filesystem permanently.
-            // We'll just log the file info for now as an example.
             const response = uploadedFiles.map(file => ({
                 name: file.originalFilename,
                 size: file.size,

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Website</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        input[type="file"] { margin: 10px; }
+        button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+    </style>
+</head>
+<body>
+    <h1>Upload Your Files</h1>
+    <form action="/api/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="files" multiple accept=".rar,.zip,.exe,.pdf,.txt,.jpg,.png">
+        <br>
+        <button type="submit">Upload Files</button>
+    </form>
+</body>
+</html>

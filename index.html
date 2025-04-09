@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LELUPLOADER</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>LELUPLOADER</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="file" name="file" id="file-input" required />
+      <button type="submit">Upload</button>
+    </form>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('upload-form');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('file-input');
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        status.innerHTML = `✅ Uploaded!<br><a href="${data.url}" target="_blank">${data.url}</a>`;
+      } else {
+        status.textContent = `❌ Error: ${data.error}`;
+      }
+    });
+  </script>
+</body>
+</html>
